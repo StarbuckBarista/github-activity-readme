@@ -132,8 +132,6 @@ Toolkit.run(
 
     tools.log.debug(events.data);
     tools.log.debug(content);
-    console.log(events.data);
-    console.log(content);
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
