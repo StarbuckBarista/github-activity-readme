@@ -1513,10 +1513,10 @@ const toUrlFormat = (item) => {
     } else {
         if (typeof item === "object") {
             return Object.hasOwnProperty.call(item.payload, "issue")
-                ? `<p align="center"><a href="${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number}">#${item.payload.issue.number}</a></p>`
-                : `<p align="center"><a href="${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number}">#${item.payload.pull_request.number}</a></p>`;
+                ? `<a href="${urlPrefix}/${item.repo.name}/issues/${item.payload.issue.number}">#${item.payload.issue.number}</a>`
+                : `<a href="${urlPrefix}/${item.repo.name}/pull/${item.payload.pull_request.number}">#${item.payload.pull_request.number}</a>`;
         }
-        return `<p align="center"><a href="${urlPrefix}/${item}">${item}</a></p>`;
+        return `<a href="${urlPrefix}/${item}">${item}</a>`;
     }
 };
 
