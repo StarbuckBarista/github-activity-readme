@@ -116,7 +116,7 @@ Toolkit.run(
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
 
-    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    const octokit = new Octokit({ auth: process.env.ACCESS_TOKEN });
     const newEvents = await octokit.request("GET /users/{username}/events", {
         username: GH_USERNAME,
         per_page: 100
@@ -283,6 +283,6 @@ Toolkit.run(
   },
   {
     event: ["schedule", "workflow_dispatch"],
-    secrets: ["GITHUB_TOKEN"],
+    secrets: ["ACCESS_TOKEN"],
   }
 );
