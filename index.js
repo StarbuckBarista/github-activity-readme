@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const { Toolkit } = require("actions-toolkit");
+const { Octokit } = require("@octokit/core");
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
@@ -112,130 +113,172 @@ const serializers = {
 
 Toolkit.run(
   async (tools) => {
-    // Get the user's public events
-    tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = await tools.github.activity.listPublicEventsForUser({
-      username: GH_USERNAME,
-      per_page: 100,
-    });
-    tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
-    );
 
-    const content = events.data
-      // Filter out any boring activity
+    tools.log.debug(`Getting Activity for ${GH_USERNAME}`);
+
+    const octokit = new Octokit({ auth: process.env.ACCESS_TOKEN });
+    const newEvents = await octokit.request("GET /users/{username}/events", {
+        username: GH_USERNAME,
+        per_page: 100
+    });
+
+    const activtyEvents = await octokit.request("GET /repos/{owner}/{repo}/actions/variables/{name}", {
+        owner: GH_USERNAME,
+        repo: GH_USERNAME,
+        name: "ACTIVITY_EVENTS"
+    });
+
+    const events = newEvents.data.concat(JSON.parse(activtyEvents.data.value));
+
+    tools.log.debug(`Activity for ${GH_USERNAME}, ${events.length} Events Found.`);
+
+    const processedContent = events
       .filter((event) => serializers.hasOwnProperty(event.type))
-      // We only have five lines to work with
-      .slice(0, MAX_LINES)
-      // Call the serializer to construct a string
-      .map((item) => serializers[item.type](item));
+      .slice(0, MAX_LINES);
+
+    tools.log.debug(`Activity for ${GH_USERNAME}, ${processedContent.length} Events Processed.`);
+
+    let content = [];
+
+    for (const activity of processedContent) {
+
+      const id = activity.id;
+      const found = content.some((uniqueActivity) => uniqueActivity.id === id);
+      if (!found) { content.push(activity); }
+    }
+    
+    let cleanedContent = [];
+
+    for (activity of content.slice(0, MAX_LINES)) {
+
+        let payload = {};
+
+        if (activity.type === "IssuesEvent") payload = { "action": activity.payload.action }
+        else if (activity.type === "PullRequestEvent") {
+            payload = {
+                "action": activity.payload.action,
+                "pull_request": { "merged": activity.payload.pull_request.merged }
+            }
+        }
+
+        const cleanedActivity = {
+            "id": activity.id,
+            "type": activity.type,
+            "repo": { "name": activity.repo.name },
+            "payload": payload
+        };
+
+        cleanedContent.push(cleanedActivity);
+    }
+
+    content = content.map((item) => serializers[item.type](item));
+
+    await octokit.request("PATCH /repos/{owner}/{repo}/actions/variables/{name}", {
+        owner: GH_USERNAME,
+        repo: GH_USERNAME,
+        name: "ACTIVITY_EVENTS",
+        value: JSON.stringify(cleanedContent)
+    });
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
-    // Find the index corresponding to <!--START_SECTION:activity--> comment
-    let startIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--START_SECTION:activity-->"
-    );
+    let startIdx = readmeContent.findIndex((content) => content.trim() === "<!--START_SECTION:activity-->");
+    if (startIdx === -1) return tools.exit.failure(`Couldn't Find the <!--START_SECTION:activity--> Comment. Exiting!`);
+    const endIdx = readmeContent.findIndex((content) => content.trim() === "<!--END_SECTION:activity-->");
 
-    // Early return in case the <!--START_SECTION:activity--> comment was not found
-    if (startIdx === -1) {
-      return tools.exit.failure(
-        `Couldn't find the <!--START_SECTION:activity--> comment. Exiting!`
-      );
-    }
-
-    // Find the index corresponding to <!--END_SECTION:activity--> comment
-    const endIdx = readmeContent.findIndex(
-      (content) => content.trim() === "<!--END_SECTION:activity-->"
-    );
-
-    if (!content.length) {
-      tools.exit.failure("No PullRequest/Issue/IssueComment events found");
-    }
-
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
-    }
+    if (!content.length) tools.exit.failure("No PullRequest/Issue/IssueComment Events Found");
+    if (content.length < MAX_LINES) tools.log.info(`Found Less Than ${MAX_LINES} Activities`);
 
     if (startIdx !== -1 && endIdx === -1) {
-      // Add one since the content needs to be inserted just after the initial comment
+
+      const markdownSpliceText = `${idx + 1}. ${line}`;
+      let spliceText;
+
+      if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
+      else spliceText = `<p align="left">${markdownSpliceText}</p>`
+
       startIdx++;
-      content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
-      );
+      content.forEach((line, idx) => readmeContent.splice(startIdx + idx, 0, spliceText));
+      readmeContent.splice(startIdx + content.length, 0, "<!--END_SECTION:activity-->");
 
-      // Append <!--END_SECTION:activity--> comment
-      readmeContent.splice(
-        startIdx + content.length,
-        0,
-        "<!--END_SECTION:activity-->"
-      );
-
-      // Update README
       fs.writeFileSync("./README.md", readmeContent.join("\n"));
 
-      // Commit to the remote repository
-      try {
-        await commitFile();
-      } catch (err) {
-        tools.log.debug("Something went wrong");
+      try { await commitFile(); } 
+      catch (err) {
+
+        tools.log.debug("Something Went Wrong");
         return tools.exit.failure(err);
       }
+
       tools.exit.success("Wrote to README");
     }
 
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
-    const newContent = content
+    const newMarkdownContent = content
       .map((line, idx) => `${idx + 1}. ${line}`)
       .join("\n");
 
-    if (oldContent.trim() === newContent.trim())
-      tools.exit.success("No changes detected");
+    let newContent
 
+    if (HTML_ENCODING === "false") newContent = newMarkdownContent;
+    else newContent = `<p align="left">${newMarkdownContent}</p>`
+
+    if (oldContent.trim() === newContent.trim()) tools.exit.success("No Changes Detected");
     startIdx++;
 
-    // Recent GitHub Activity content between the comments
     const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
     if (!readmeActivitySection.length) {
+
       content.some((line, idx) => {
-        // User doesn't have 5 public events
-        if (!line) {
-          return true;
-        }
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
+
+        if (!line) return true;
+        const markdownSpliceText = `${idx + 1}. ${line}`;
+        let spliceText;
+
+        if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
+        else spliceText = `<p align="left">${markdownSpliceText}</p>`
+
+        readmeContent.splice(startIdx + idx, 0, spliceText);
       });
+
       tools.log.success("Wrote to README");
     } else {
-      // It is likely that a newline is inserted after the <!--START_SECTION:activity--> comment (code formatter)
+    
       let count = 0;
 
       readmeActivitySection.some((line, idx) => {
-        // User doesn't have 5 public events
-        if (!content[count]) {
-          return true;
-        }
+
+        if (!content[count]) return true;
+
         if (line !== "") {
-          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+
+          const markdownReadmeContentText = `${count + 1}. ${content[count]}`
+          let readmeContentText;
+
+          if (HTML_ENCODING === "false") readmeContentText = markdownReadmeContentText;
+          else readmeContentText = `<p align="left">${markdownReadmeContentText}</p>`
+
+          readmeContent[startIdx + idx] = readmeContentText;
           count++;
         }
       });
-      tools.log.success("Updated README with the recent activity");
+
+      tools.log.success("Updated README with the Recent Activity");
     }
 
-    // Update README
     fs.writeFileSync("./README.md", readmeContent.join("\n"));
 
-    // Commit to the remote repository
-    try {
-      await commitFile();
-    } catch (err) {
-      tools.log.debug("Something went wrong");
+    try { await commitFile(); } 
+    catch (err) {
+
+      tools.log.debug("Something Went Wrong");
       return tools.exit.failure(err);
     }
-    tools.exit.success("Pushed to remote repository");
+
+    tools.exit.success("Pushed to Remote Repository");
   },
   {
     event: ["schedule", "workflow_dispatch"],
-    secrets: ["GITHUB_TOKEN"],
+    secrets: ["ACCESS_TOKEN"],
   }
 );

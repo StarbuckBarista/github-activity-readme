@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
+    "@octokit/core": "^4.2.4",
     "actions-toolkit": "^5.0.0"
   },
   "devDependencies": {
