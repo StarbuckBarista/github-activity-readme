@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const { Toolkit } = require("actions-toolkit");
+const { Octokit } = require("@octokit/core");
 
 // Get config
 const GH_USERNAME = core.getInput("GH_USERNAME");
@@ -114,10 +115,13 @@ Toolkit.run(
   async (tools) => {
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = await tools.github.activity.listPublicEventsForUser({
-      username: GH_USERNAME,
-      per_page: 100,
+
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    const events = await octokit.request("GET /users/{username}/events", {
+        username: GH_USERNAME,
+        per_page: 100,
     });
+
     tools.log.debug(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
     );

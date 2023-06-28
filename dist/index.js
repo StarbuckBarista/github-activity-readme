@@ -1589,10 +1589,13 @@ Toolkit.run(
   async (tools) => {
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
-    const events = await tools.github.activity.listPublicEventsForUser({
-      username: GH_USERNAME,
-      per_page: 100,
+
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    const events = await octokit.request("GET /users/{username}/events", {
+        username: GH_USERNAME,
+        per_page: 100, 
     });
+
     tools.log.debug(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
     );
