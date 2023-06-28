@@ -1688,18 +1688,24 @@ Toolkit.run(
     
     let cleanedContent = [];
 
-    for (activity of content.slice(0 ,MAX_LINES)) {
+    for (activity of content.slice(0, MAX_LINES)) {
 
-        tools.log.debug(activity)
+        let payload = {};
+
+        if (activity.type === "IssuesEvent") payload = { "action": activity.payload.action }
+        else if (activity.type === "PullRequestEvent") {
+            payload = {
+                "action": activity.payload.action,
+                "pull_request": { "merged": activity.payload.pull_request.merged }
+            }
+        }
 
         const cleanedActivity = {
             "id": activity.id,
             "type": activity.type,
             "repo": { "name": activity.repo.name },
-            "payload": activity.payload
+            "payload": payload
         };
-
-        tools.log.debug(cleanedActivity)
 
         cleanedContent.push(cleanedActivity);
     }
