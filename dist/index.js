@@ -1590,6 +1590,7 @@ Toolkit.run(
     // Get the user's public events
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
 
+    const { Octokit } = require("@octokit/core");
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
     const events = await octokit.request("GET /users/{username}/events", {
         username: GH_USERNAME,
