@@ -117,16 +117,24 @@ Toolkit.run(
     tools.log.debug(`Getting activity for ${GH_USERNAME}`);
 
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-    const events = await octokit.request("GET /users/{username}/events", {
+    const newEvents = await octokit.request("GET /users/{username}/events", {
         username: GH_USERNAME,
-        per_page: 100,
+        per_page: 100
     });
+
+    const activtyEvents = await octokit.request("GET /repos/{owner}/{repo}/actions/variables/{name}", {
+        owner: GH_USERNAME,
+        repo: GH_USERNAME,
+        name: "ACTIVITY_EVENTS"
+    });
+
+    const events = newEvents.concat(JSON.parse(activtyEvents.data.value));
 
     tools.log.debug(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
     );
 
-    const content = events.data
+    const processedContent = events.data
       // Filter out any boring activity
       .filter((event) => serializers.hasOwnProperty(event.type))
       // We only have five lines to work with
@@ -134,8 +142,14 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    tools.log.debug(events.data);
-    tools.log.debug(content);
+    const content = [...new Set(processedContent)];
+
+    await octokit.request("PUT /repos/{owner}/{repo}/actions/variables/{name}", {
+        owner: GH_USERNAME,
+        repo: GH_USERNAME,
+        name: "ACTIVITY_EVENTS",
+        value: JSON.stringify(events.data.slice(MAX_LINES))
+    });
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
 
