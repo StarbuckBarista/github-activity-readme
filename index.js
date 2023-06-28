@@ -96,18 +96,18 @@ const serializers = {
   IssueCommentEvent: (item) => {
 
     const image = '<img alt="Commented on" height="24px" valign="bottom" src="./icons/activities/commented_on.png">';
-    return ` ${image}  ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    return ` ${image}  Issue ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 
   IssuesEvent: (item) => {
 
-    const image = `<img alt="${item.payload.action.charAt(0).toUpperCase() + item.payload.action.slice(1)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
-    return ` ${image}  ${capitalize(item.payload.action)} issue ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    const image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
+    return ` ${image}  Issue ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 
   PullRequestEvent: (item) => {
 
-    let image = `<img alt="${item.payload.action.charAt(0).toUpperCase() + item.payload.action.slice(1)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
+    let image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
     if (item.payload.pull_request.merged) image = '<img alt="Merged" height="24px" valign="bottom" src="./icons/activities/merged.png">';
     return ` ${image}  PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
