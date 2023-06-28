@@ -1567,21 +1567,21 @@ const commitFile = async () => {
 
 const serializers = {
   IssueCommentEvent: (item) => {
-    return `<p align="center">🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
+    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
       item.repo.name
-    )}</p>`;
+    )}`;
   },
   IssuesEvent: (item) => {
-    return `<p align="center">❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
       item
-    )} in ${toUrlFormat(item.repo.name)}</p>`;
+    )} in ${toUrlFormat(item.repo.name)}`;
   },
   PullRequestEvent: (item) => {
     const emoji = item.payload.action === "opened" ? "💪" : "❌";
     const line = item.payload.pull_request.merged
       ? "🎉 Merged"
       : `${emoji} ${capitalize(item.payload.action)}`;
-    return `<p align="center">${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}</p>`;
+    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 };
 
