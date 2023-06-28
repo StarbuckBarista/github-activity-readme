@@ -216,7 +216,7 @@ Toolkit.run(
       let spliceText;
 
       if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
-      else spliceText = `<p align="center">${markdownSpliceText}</p>`
+      else spliceText = `<p align="left">${markdownSpliceText}</p>`
 
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
@@ -252,7 +252,7 @@ Toolkit.run(
     let newContent
 
     if (HTML_ENCODING === "false") newContent = newMarkdownContent;
-    else newContent = `<p align="center">${newMarkdownContent}</p>`
+    else newContent = `<p align="left">${newMarkdownContent}</p>`
 
     if (oldContent.trim() === newContent.trim())
       tools.exit.success("No changes detected");
@@ -272,7 +272,7 @@ Toolkit.run(
         let spliceText;
 
         if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
-        else spliceText = `<p align="center">${markdownSpliceText}</p>`
+        else spliceText = `<p align="left">${markdownSpliceText}</p>`
 
         readmeContent.splice(startIdx + idx, 0, spliceText);
       });
@@ -292,7 +292,7 @@ Toolkit.run(
           let readmeContentText;
 
           if (HTML_ENCODING === "false") readmeContentText = markdownReadmeContentText;
-          else readmeContentText = `<p align="center">${markdownReadmeContentText}</p>`
+          else readmeContentText = `<p align="left">${markdownReadmeContentText}</p>`
 
           readmeContent[startIdx + idx] = readmeContentText;
           count++;
