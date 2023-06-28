@@ -1629,22 +1629,24 @@ const commitFile = async () => {
 };
 
 const serializers = {
+
   IssueCommentEvent: (item) => {
-    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
-      item.repo.name
-    )}`;
+
+    const image = '<img alt="Commented on" height="24px" valign="bottom" src="./icons/activities/commented_on.png">';
+    return ` ${image}  ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
+
   IssuesEvent: (item) => {
-    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
-      item
-    )} in ${toUrlFormat(item.repo.name)}`;
+
+    const image = `<img alt="${item.payload.action.charAt(0).toUpperCase() + item.payload.action.slice(1)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
+    return ` ${image}  ${capitalize(item.payload.action)} issue ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
+
   PullRequestEvent: (item) => {
-    const emoji = item.payload.action === "opened" ? "💪" : "❌";
-    const line = item.payload.pull_request.merged
-      ? "🎉 Merged"
-      : `${emoji} ${capitalize(item.payload.action)}`;
-    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+
+    let image = `<img alt="${item.payload.action.charAt(0).toUpperCase() + item.payload.action.slice(1)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
+    if (item.payload.pull_request.merged) image = '<img alt="Merged" height="24px" valign="bottom" src="./icons/activities/merged.png">';
+    return ` ${image}  PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 };
 
