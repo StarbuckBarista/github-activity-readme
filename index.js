@@ -131,10 +131,10 @@ Toolkit.run(
     const events = newEvents.data.concat(JSON.parse(activtyEvents.data.value));
 
     tools.log.debug(
-      `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
+      `Activity for ${GH_USERNAME}, ${events.length} events found.`
     );
 
-    const processedContent = events.data
+    const processedContent = events
       // Filter out any boring activity
       .filter((event) => serializers.hasOwnProperty(event.type))
       // We only have five lines to work with
@@ -148,7 +148,7 @@ Toolkit.run(
         owner: GH_USERNAME,
         repo: GH_USERNAME,
         name: "ACTIVITY_EVENTS",
-        value: JSON.stringify(events.data.slice(MAX_LINES))
+        value: JSON.stringify(events.slice(MAX_LINES))
     });
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
