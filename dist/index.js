@@ -1679,13 +1679,34 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const content = [...new Set(processedContent)];
+    const content = [];
+
+    for (const activity of processedContent) {
+
+      const id = activity.id;
+      const found = content.some((uniqueActivity) => uniqueActivity.id === id);
+      if (!found) { content.push(activity); }
+    }
+    
+    const cleanedContent = [];
+
+    for (activity of content.slice(MAX_LINES)) {
+
+        const cleanedActivity = {
+            "id": activity.id,
+            "type": activity.type,
+            "repo": { "name": activity.repo.name },
+            "payload": activity.payload
+        };
+
+        cleanedContent.push(cleanedActivity);
+    }
 
     await octokit.request("PATCH /repos/{owner}/{repo}/actions/variables/{name}", {
         owner: GH_USERNAME,
         repo: GH_USERNAME,
         name: "ACTIVITY_EVENTS",
-        value: JSON.stringify(events.slice(MAX_LINES))
+        value: JSON.stringify(cleanedContent)
     });
 
     const readmeContent = fs.readFileSync("./README.md", "utf-8").split("\n");
