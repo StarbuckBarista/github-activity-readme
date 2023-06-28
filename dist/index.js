@@ -1681,7 +1681,7 @@ Toolkit.run(
 
     const content = [...new Set(processedContent)];
 
-    await octokit.request("PUT /repos/{owner}/{repo}/actions/variables/{name}", {
+    await octokit.request("PATCH /repos/{owner}/{repo}/actions/variables/{name}", {
         owner: GH_USERNAME,
         repo: GH_USERNAME,
         name: "ACTIVITY_EVENTS",
