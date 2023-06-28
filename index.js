@@ -156,8 +156,8 @@ Toolkit.run(
       tools.exit.failure("No PullRequest/Issue/IssueComment events found");
     }
 
-    if (content.length < 5) {
-      tools.log.info("Found less than 5 activities");
+    if (content.length < MAX_LINES) {
+      tools.log.info(`Found less than ${MAX_LINES} activities`);
     }
 
     if (startIdx !== -1 && endIdx === -1) {
@@ -213,7 +213,7 @@ Toolkit.run(
     const readmeActivitySection = readmeContent.slice(startIdx, endIdx);
     if (!readmeActivitySection.length) {
       content.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have enough public events
         if (!line) {
           return true;
         }
@@ -232,7 +232,7 @@ Toolkit.run(
       let count = 0;
 
       readmeActivitySection.some((line, idx) => {
-        // User doesn't have 5 public events
+        // User doesn't have enough public events
         if (!content[count]) {
           return true;
         }
