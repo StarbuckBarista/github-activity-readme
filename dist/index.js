@@ -1686,7 +1686,6 @@ Toolkit.run(
       if (!found) { content.push(activity); }
     }
 
-    content = content.map((item) => serializers[item.type](item));
     tools.log.debug(content)
     
     let cleanedContent = [];
@@ -1703,6 +1702,7 @@ Toolkit.run(
         cleanedContent.push(cleanedActivity);
     }
 
+    content = content.map((item) => serializers[item.type](item));
     tools.log.debug(cleanedContent)
 
     await octokit.request("PATCH /repos/{owner}/{repo}/actions/variables/{name}", {
