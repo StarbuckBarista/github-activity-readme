@@ -151,7 +151,7 @@ Toolkit.run(
     
     let cleanedContent = [];
 
-    for (activity of content.slice(MAX_LINES)) {
+    for (activity of content.slice(0 ,MAX_LINES)) {
 
         tools.log.debug(activity)
 
