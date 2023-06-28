@@ -1679,7 +1679,7 @@ Toolkit.run(
       // Call the serializer to construct a string
       .map((item) => serializers[item.type](item));
 
-    const content = [];
+    let content = [];
 
     for (const activity of processedContent) {
 
@@ -1688,7 +1688,7 @@ Toolkit.run(
       if (!found) { content.push(activity); }
     }
     
-    const cleanedContent = [];
+    let cleanedContent = [];
 
     for (activity of content.slice(MAX_LINES)) {
 
