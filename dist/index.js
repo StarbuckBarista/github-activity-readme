@@ -1665,7 +1665,7 @@ Toolkit.run(
         name: "ACTIVITY_EVENTS"
     });
 
-    const events = newEvents.concat(JSON.parse(activtyEvents.data.value));
+    const events = newEvents.data.concat(JSON.parse(activtyEvents.data.value));
 
     tools.log.debug(
       `Activity for ${GH_USERNAME}, ${events.data.length} events found.`
