@@ -150,6 +150,8 @@ Toolkit.run(
       const found = content.some((uniqueActivity) => uniqueActivity.id === id);
       if (!found) { content.push(activity); }
     }
+
+    tools.log.debug(content)
     
     let cleanedContent = [];
 
@@ -164,6 +166,8 @@ Toolkit.run(
 
         cleanedContent.push(cleanedActivity);
     }
+
+    tools.log.debug(cleanedContent)
 
     await octokit.request("PATCH /repos/{owner}/{repo}/actions/variables/{name}", {
         owner: GH_USERNAME,
