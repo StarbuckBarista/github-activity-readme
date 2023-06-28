@@ -1685,12 +1685,12 @@ Toolkit.run(
       const found = content.some((uniqueActivity) => uniqueActivity.id === id);
       if (!found) { content.push(activity); }
     }
-
-    tools.log.debug(content)
     
     let cleanedContent = [];
 
     for (activity of content.slice(MAX_LINES)) {
+
+        tools.log.debug(activity)
 
         const cleanedActivity = {
             "id": activity.id,
@@ -1698,6 +1698,8 @@ Toolkit.run(
             "repo": { "name": activity.repo.name },
             "payload": activity.payload
         };
+
+        tools.log.debug(cleanedActivity)
 
         cleanedContent.push(cleanedActivity);
     }
