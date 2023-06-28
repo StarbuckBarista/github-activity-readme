@@ -138,9 +138,7 @@ Toolkit.run(
       // Filter out any boring activity
       .filter((event) => serializers.hasOwnProperty(event.type))
       // We only have five lines to work with
-      .slice(0, MAX_LINES)
-      // Call the serializer to construct a string
-      .map((item) => serializers[item.type](item));
+      .slice(0, MAX_LINES);
 
     let content = [];
 
@@ -151,6 +149,7 @@ Toolkit.run(
       if (!found) { content.push(activity); }
     }
 
+    content.map((item) => serializers[item.type](item));
     tools.log.debug(content)
     
     let cleanedContent = [];
