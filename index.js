@@ -92,21 +92,21 @@ const commitFile = async () => {
 
 const serializers = {
   IssueCommentEvent: (item) => {
-    return `🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
+    return `<p align="center">🗣 Commented on ${toUrlFormat(item)} in ${toUrlFormat(
       item.repo.name
-    )}`;
+    )}</p>`;
   },
   IssuesEvent: (item) => {
-    return `❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
+    return `<p align="center">❗️ ${capitalize(item.payload.action)} issue ${toUrlFormat(
       item
-    )} in ${toUrlFormat(item.repo.name)}`;
+    )} in ${toUrlFormat(item.repo.name)}</p>`;
   },
   PullRequestEvent: (item) => {
     const emoji = item.payload.action === "opened" ? "💪" : "❌";
     const line = item.payload.pull_request.merged
       ? "🎉 Merged"
       : `${emoji} ${capitalize(item.payload.action)}`;
-    return `${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
+    return `<p align="center">${line} PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}</p>`;
   },
 };
 
@@ -188,9 +188,14 @@ Toolkit.run(
     }
 
     const oldContent = readmeContent.slice(startIdx + 1, endIdx).join("\n");
-    const newContent = content
+    const newMarkdownContent = content
       .map((line, idx) => `${idx + 1}. ${line}`)
       .join("\n");
+
+    let newContent
+
+    if (HTML_ENCODING === "false") newContent = newMarkdownContent;
+    else newContent = `<p align="center">${newMarkdownContent}</p>`
 
     if (oldContent.trim() === newContent.trim())
       tools.exit.success("No changes detected");
@@ -205,7 +210,14 @@ Toolkit.run(
         if (!line) {
           return true;
         }
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`);
+
+        const markdownSpliceText = `${idx + 1}. ${line}`;
+        let spliceText;
+
+        if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
+        else spliceText = `<p align="center">${markdownSpliceText}</p>`
+
+        readmeContent.splice(startIdx + idx, 0, spliceText);
       });
       tools.log.success("Wrote to README");
     } else {
@@ -218,7 +230,14 @@ Toolkit.run(
           return true;
         }
         if (line !== "") {
-          readmeContent[startIdx + idx] = `${count + 1}. ${content[count]}`;
+
+          const markdownReadmeContentText = `${count + 1}. ${content[count]}`
+          let readmeContentText;
+
+          if (HTML_ENCODING === "false") readmeContentText = markdownReadmeContentText;
+          else readmeContentText = `<p align="center">${markdownReadmeContentText}</p>`
+
+          readmeContent[startIdx + idx] = readmeContentText;
           count++;
         }
       });
