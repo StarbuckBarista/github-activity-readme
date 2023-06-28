@@ -161,10 +161,17 @@ Toolkit.run(
     }
 
     if (startIdx !== -1 && endIdx === -1) {
+
+      const markdownSpliceText = `${idx + 1}. ${line}`;
+      let spliceText;
+
+      if (HTML_ENCODING === "false") spliceText = markdownSpliceText;
+      else spliceText = `<p align="center">${markdownSpliceText}</p>`
+
       // Add one since the content needs to be inserted just after the initial comment
       startIdx++;
       content.forEach((line, idx) =>
-        readmeContent.splice(startIdx + idx, 0, `${idx + 1}. ${line}`)
+        readmeContent.splice(startIdx + idx, 0, spliceText)
       );
 
       // Append <!--END_SECTION:activity--> comment
