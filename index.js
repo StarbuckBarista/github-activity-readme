@@ -149,7 +149,7 @@ Toolkit.run(
       if (!found) { content.push(activity); }
     }
 
-    content.map((item) => serializers[item.type](item));
+    content = content.map((item) => serializers[item.type](item));
     tools.log.debug(content)
     
     let cleanedContent = [];
