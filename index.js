@@ -101,14 +101,14 @@ const serializers = {
 
   IssuesEvent: (item) => {
 
-    const image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
+    const image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}_issue.png">`
     return ` ${image}  Issue ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 
   PullRequestEvent: (item) => {
 
-    let image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}.png">`
-    if (item.payload.pull_request.merged) image = '<img alt="Merged" height="24px" valign="bottom" src="./icons/activities/merged.png">';
+    let image = `<img alt="${capitalize(item.payload.action)}" height="24px" valign="bottom" src="./icons/activities/${item.payload.action}_pull_request.png">`
+    if (item.payload.pull_request.merged) image = '<img alt="Merged" height="24px" valign="bottom" src="./icons/activities/merged_pull_request.png">';
     return ` ${image}  PR ${toUrlFormat(item)} in ${toUrlFormat(item.repo.name)}`;
   },
 };
