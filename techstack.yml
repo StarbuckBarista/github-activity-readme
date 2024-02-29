@@ -2,7 +2,7 @@ repo_name: StarbuckBarista/github-activity-readme
 report_id: fb12212b9911b5c83bf9a954f9dd71ba
 version: 0.1
 repo_type: Public
-timestamp: '2024-01-05T09:08:11+00:00'
+timestamp: '2024-02-29T18:20:34+00:00'
 requested_by: StarbuckBarista
 provider: github
 branch: master
@@ -54,7 +54,7 @@ tools:
   last_updated_by: StarbuckBarista
   last_updated_on: 2023-06-28 00:42:06.000000000 Z
 - name: Prettier
-  description: 'Prettier is an opinionated code formatter. '
+  description: Prettier is an opinionated code formatter.
   website_url: https://prettier.io/
   version: 2.0.5
   license: MIT
